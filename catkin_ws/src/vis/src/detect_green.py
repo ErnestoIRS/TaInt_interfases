@@ -1,19 +1,18 @@
 #!/usr/bin/env python
 
 import rospy
-import cv2
-from cv_bridge import CvBridge
 from sensor_msgs.msg import Image
 from std_msgs.msg import String
+from cv_bridge import CvBridge
+import cv2
 import numpy as np
 
 class GreenObjectDetector:
     def __init__(self):
-        rospy.init_node('green_object_detector')
+        rospy.init_node('green_object_detector_node')
         self.bridge = CvBridge()
-
-        self.image_sub = rospy.Subscriber("/camera/image_raw", Image, self.image_callback)
         self.green_object_pub = rospy.Publisher("/green_object_coordinates", String, queue_size=1)
+        self.image_sub = rospy.Subscriber("/camera/image_raw", Image, self.image_callback)
 
     def image_callback(self, data):
         try:
@@ -33,7 +32,7 @@ class GreenObjectDetector:
         green_mask = cv2.inRange(hsv_image, lower_green, upper_green)
 
         # Find contours in the mask
-        contours, _ = cv2.findContours(green_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours = cv2.findContours(green_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[0]
 
         green_object_coordinates = ""
 
