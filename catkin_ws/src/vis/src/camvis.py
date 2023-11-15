@@ -15,7 +15,7 @@ image_pub = rospy.Publisher('/camera/image_raw', Image, queue_size=10)
 bridge = CvBridge()
 
 port = '8081'  # Replace with the actual port of your Yawcam server
-stream_url = 'http://' + "192.168.1.68" + ':' + port + '/video.mjpg'
+stream_url = 'http://' + "192.168.137.1" + ':' + port + '/video.mjpg'
 
 stream = requests.get(stream_url, stream=True)
 bytes = b''

@@ -6,12 +6,13 @@ from std_msgs.msg import String
 from cv_bridge import CvBridge
 import cv2
 import numpy as np
+from geometry_msgs.msg import Point
 
 class GreenObjectDetector:
     def __init__(self):
         rospy.init_node('green_object_detector_node')
         self.bridge = CvBridge()
-        self.green_object_pub = rospy.Publisher("/green_object_coordinates", String, queue_size=1)
+        self.green_object_pub = rospy.Publisher("/green_object_coordinates", Point, queue_size=1)
         self.image_sub = rospy.Subscriber("/camera/image_raw", Image, self.image_callback)
 
     def image_callback(self, data):
@@ -34,17 +35,14 @@ class GreenObjectDetector:
         # Find contours in the mask
         contours = cv2.findContours(green_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[0]
 
-        green_object_coordinates = ""
-
         for contour in contours:
             M = cv2.moments(contour)
             if M["m00"] != 0:
                 cx = int(M["m10"] / M["m00"])
                 cy = int(M["m01"] / M["m00"])
-                green_object_coordinates += "({}, {}) ".format(cx, cy)
+                green_object_msg = Point(x=cx, y=cy, z=0)
 
-        if green_object_coordinates:
-            self.green_object_pub.publish(green_object_coordinates)
+                self.green_object_pub.publish(green_object_msg)
 
 if __name__ == '__main__':
     try:
