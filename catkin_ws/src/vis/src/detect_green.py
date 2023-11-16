@@ -2,17 +2,16 @@
 
 import rospy
 from sensor_msgs.msg import Image
-from std_msgs.msg import String
+from geometry_msgs.msg import PointStamped
 from cv_bridge import CvBridge
 import cv2
 import numpy as np
-from geometry_msgs.msg import Point
 
 class GreenObjectDetector:
     def __init__(self):
         rospy.init_node('green_object_detector_node')
         self.bridge = CvBridge()
-        self.green_object_pub = rospy.Publisher("/green_object_coordinates", Point, queue_size=1)
+        self.green_object_pub = rospy.Publisher("/green_object_coordinates", PointStamped, queue_size=1)
         self.image_sub = rospy.Subscriber("/camera/image_raw", Image, self.image_callback)
 
     def image_callback(self, data):
@@ -40,7 +39,14 @@ class GreenObjectDetector:
             if M["m00"] != 0:
                 cx = int(M["m10"] / M["m00"])
                 cy = int(M["m01"] / M["m00"])
-                green_object_msg = Point(x=cx, y=cy, z=0)
+
+                # Crear un mensaje PointStamped
+                green_object_msg = PointStamped()
+                green_object_msg.header.stamp = rospy.Time.now()
+                green_object_msg.header.frame_id = "camera_frame"  # Sustituye con el frame_id correcto si es necesario
+                green_object_msg.point.x = cx
+                green_object_msg.point.y = cy
+                green_object_msg.point.z = 0
 
                 self.green_object_pub.publish(green_object_msg)
 
